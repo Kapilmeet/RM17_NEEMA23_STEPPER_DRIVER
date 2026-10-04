@@ -1,0 +1,5 @@
+../Core/Src/command_parser.c:30:6:CMD_Init	4	static
+../Core/Src/command_parser.c:37:13:trim_whitespace	24	static
+../Core/Src/command_parser.c:47:13:execute_command	256	static
+../Core/Src/command_parser.c:199:6:CMD_ProcessByte	16	static
+../Core/Src/command_parser.c:223:6:CMD_Poll	16	static

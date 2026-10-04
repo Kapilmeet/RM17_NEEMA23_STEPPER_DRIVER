@@ -1,0 +1,16 @@
+../Drivers/CMSIS/Include/core_cm3.h:1511:22:__NVIC_EnableIRQ	2
+../Drivers/CMSIS/Include/core_cm3.h:1639:22:__NVIC_SetPriority	2
+../Core/Src/usb_cdc.c:41:20:set_tx_stat	1
+../Core/Src/usb_cdc.c:47:20:set_rx_stat	1
+../Core/Src/usb_cdc.c:53:20:clear_ctr_tx	1
+../Core/Src/usb_cdc.c:57:20:clear_ctr_rx	1
+../Core/Src/usb_cdc.c:63:13:pma_write	3
+../Core/Src/usb_cdc.c:76:13:pma_read	3
+../Core/Src/usb_cdc.c:147:13:ep0_send_data	2
+../Core/Src/usb_cdc.c:162:13:handle_setup	19
+../Core/Src/usb_cdc.c:270:6:USB_CDC_IRQHandler	21
+../Core/Src/usb_cdc.c:380:6:USB_CDC_Init	2
+../Core/Src/usb_cdc.c:415:9:USB_CDC_Transmit	9
+../Core/Src/usb_cdc.c:442:9:USB_CDC_Print	1
+../Core/Src/usb_cdc.c:447:10:USB_CDC_Available	2
+../Core/Src/usb_cdc.c:456:9:USB_CDC_Read	2
