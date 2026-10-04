@@ -138,10 +138,11 @@ int main(void)
     /* 2. Check if a motion move has just finished */
     if (g_last_moving && !g_stepper.moving)
     {
+      char pos_str[32];
       char done_msg[64];
+      CMD_FormatFloat(pos_str, sizeof(pos_str), Stepper_GetPosition(&g_stepper), 3);
       snprintf(done_msg, sizeof(done_msg),
-               "DONE: Reached %.3f DEG\r\n",
-               Stepper_GetPosition(&g_stepper));
+               "DONE: Reached %s DEG\r\n", pos_str);
       USB_CDC_Print(done_msg);
     }
     g_last_moving = g_stepper.moving;

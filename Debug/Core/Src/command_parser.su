@@ -1,5 +1,7 @@
-../Core/Src/command_parser.c:32:6:CMD_Init	4	static
+../Core/Src/command_parser.c:33:6:CMD_Init	4	static
 ../Core/Src/command_parser.c:39:13:trim_whitespace	24	static
-../Core/Src/command_parser.c:49:13:execute_command	256	static
-../Core/Src/command_parser.c:215:6:CMD_ProcessByte	16	static
-../Core/Src/command_parser.c:239:6:CMD_Poll	16	static
+../Core/Src/command_parser.c:51:6:CMD_FormatFloat	56	static
+../Core/Src/command_parser.c:79:13:trim_float_str	24	static
+../Core/Src/command_parser.c:92:13:execute_command	424	static
+../Core/Src/command_parser.c:280:6:CMD_ProcessByte	16	static
+../Core/Src/command_parser.c:303:6:CMD_Poll	16	static
