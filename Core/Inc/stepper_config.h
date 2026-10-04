@@ -42,6 +42,18 @@
 #define MIN_STEP_FREQ          100.0f      /* Hz – starting / stopping speed */
 #define MAX_STEP_FREQ          100000.0f   /* Hz – absolute ceiling */
 
+/* ==================== N-MOTION ROTARY MODULO 360 CONTROL ==================== */
+/*
+ * 1: Shortest-Path Modulo 360: Rotates along the shortest circular path (<= 180 deg)
+ *    to reach target orientation (e.g. from 0 to 270 moves -90 CCW).
+ * 0: Direct Modulo 360: Preserves commanded direction for single-turn moves, but
+ *    suppresses redundant full 360-degree rotations.
+ *
+ * In BOTH modes: If (current_angle - target_angle) is any integer multiple of 360 degrees
+ * (e.g. 0 to 360, 0 to -360, 90 to -270, 90 to 450), the motor does NOT move.
+ */
+#define N_MOTION_SHORTEST_PATH 0U
+
 /* ==================== MATH ==================== */
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

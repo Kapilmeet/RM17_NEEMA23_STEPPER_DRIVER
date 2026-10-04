@@ -3,6 +3,8 @@
  * @brief   USB CDC Command Parser for Stepper Motion Controller
  *
  * Supported Command Formats:
+ *   SET_POS <angle> <microstepping>
+ *   GET_POS         -> Query current output angle (absolute in degrees)
  *   <angle>, <ppr> [, <accel>] [, <speed>]
  *   G <angle>, <ppr> [, <accel>] [, <speed>]
  *   P or POS?       -> Query current output angle
@@ -54,8 +56,10 @@ static void execute_command(char *line, StepperMotor *motor)
         return;
     }
 
-    /* 1. Query Position: "P" or "POS" or "POS?" */
-    if (strcasecmp(line, "P") == 0 ||
+    /* 1. Query Position: "GET_POS", "P", "POS", or "POS?" */
+    if (strcasecmp(line, "GET_POS") == 0 ||
+        strcasecmp(line, "GET_POS?") == 0 ||
+        strcasecmp(line, "P") == 0 ||
         strcasecmp(line, "POS") == 0 ||
         strcasecmp(line, "POS?") == 0)
     {
@@ -95,16 +99,19 @@ static void execute_command(char *line, StepperMotor *motor)
     }
 
     /* 5. Move Command:
-     *    Format: [G/MOVE] <angle>, <ppr> [, <accel>] [, <speed>]
+     *    Format: SET_POS <angle> <microstepping>
+     *            [G/MOVE] <angle>, <ppr> [, <accel>] [, <speed>]
      *    Optional fields can be omitted or left blank.
      */
     char *ptr = line;
 
-    /* Skip optional 'G' or 'MOVE' prefix */
-    if (*ptr == 'G' || *ptr == 'g') {
-        ptr++;
+    /* Skip optional 'SET_POS', 'MOVE', or 'G' prefix */
+    if (strncasecmp(ptr, "SET_POS", 7) == 0) {
+        ptr += 7;
     } else if (strncasecmp(ptr, "MOVE", 4) == 0) {
         ptr += 4;
+    } else if (*ptr == 'G' || *ptr == 'g') {
+        ptr++;
     }
     while (isspace((unsigned char)*ptr)) ptr++;
 
@@ -139,7 +146,7 @@ static void execute_command(char *line, StepperMotor *motor)
             }
         }
     } else {
-        /* Space-separated tokens */
+        /* Space-separated tokens (e.g. SET_POS <angle> <microstepping>) */
         token1 = strtok(ptr, " \t");
         token2 = strtok(NULL, " \t");
         token3 = strtok(NULL, " \t");
@@ -147,7 +154,7 @@ static void execute_command(char *line, StepperMotor *motor)
     }
 
     if (!token1 || !token2) {
-        USB_CDC_Print("ERR: Expected <angle>, <ppr> [, <accel>] [, <speed>]\r\n");
+        USB_CDC_Print("ERR: Expected SET_POS <angle> <microstepping> or <angle>, <ppr>\r\n");
         return;
     }
 
@@ -189,6 +196,15 @@ static void execute_command(char *line, StepperMotor *motor)
 
     /* Execute the move */
     Stepper_MoveTo(motor, target_angle, ppr, accel, speed);
+
+    /* If move was suppressed (e.g. integer multiple of 360 deg), report in-position */
+    if (!motor->moving) {
+        snprintf(reply, sizeof(reply),
+                 "OK: Already at target position (%.3f DEG | Modulo 360 - No move)\r\n",
+                 Stepper_GetPosition(motor));
+        USB_CDC_Print(reply);
+        return;
+    }
 
     snprintf(reply, sizeof(reply),
              "OK: Moving to %.3f DEG | PPR=%lu | Accel=%.2f rad/s2 | Speed=%.2f rad/s\r\n",

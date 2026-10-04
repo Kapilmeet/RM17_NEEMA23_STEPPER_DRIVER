@@ -183,9 +183,37 @@ void Stepper_MoveTo(StepperMotor *m, float target_deg,
 
     /* Calculate delta angle in degrees at the output of the 1:10 gearbox */
     float delta_deg = target_deg - m->current_position_deg;
-    if (fabsf(delta_deg) < 0.001f) {
-        return; /* Already at target */
+
+    /* =========================================================================
+     * N-MOTION ROTARY MODULO 360 LOGIC CONTROL
+     * =========================================================================
+     * Inspired by N-Motion / industrial rotary axis positioning documentation:
+     * On a 360-degree rotary axis, any orientation is cyclic with period 360°.
+     * If the difference between current position and commanded position is any
+     * integer multiple of 360 degrees:
+     *   diff = k * 360.0 deg (where k = 0, +/-1, +/-2, ...)
+     * the physical output shaft is ALREADY at the commanded orientation.
+     * Examples:
+     *   - Current = 0°,   Target = 360°  -> diff = 360°  (k = 1)  -> DO NOT MOVE.
+     *   - Current = 0°,   Target = -360° -> diff = -360° (k = -1) -> DO NOT MOVE.
+     *   - Current = 90°,  Target = -270° -> diff = -360° (k = -1) -> DO NOT MOVE.
+     *   - Current = 90°,  Target = 450°  -> diff = 360°  (k = 1)  -> DO NOT MOVE.
+     * =========================================================================
+     */
+    float k_turns = roundf(delta_deg / 360.0f);
+    float modulo_diff = delta_deg - (k_turns * 360.0f);
+
+    /* If difference from an integer multiple of 360 is negligible, we are already in position */
+    if (fabsf(modulo_diff) < 0.005f) {
+        return; /* Already at target orientation */
     }
+
+#if (N_MOTION_SHORTEST_PATH == 1)
+    /* Shortest-Path Modulo Mode:
+     * Traverses the shortest circular arc (<= 180 deg) on the 360 deg circle
+     */
+    delta_deg = modulo_diff;
+#endif
 
     /* Total output pulses per revolution: GEAR_RATIO (10) * motor PPR */
     uint32_t total_ppr_output = GEAR_RATIO * m->pulses_per_rev;
